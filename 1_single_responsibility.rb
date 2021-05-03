@@ -19,5 +19,9 @@ class Server
     end
   end
 
-  
+  def start_ssh as: "deploy", &block
+    Net::SSH.start self.ip do |ssh|
+      block.call ssh
+    end
+  end
 end
