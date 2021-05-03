@@ -6,7 +6,7 @@ class Server < ApplicationRecord
   validates :name, presence: true
 end
 
-class Server::Management
+class Server::Setup < Server::SSH
   def perform
     start_ssh self, as: "root" do |ssh|
       ssh.execute "apt install ruby"
@@ -15,7 +15,7 @@ class Server::Management
   end
 end
 
-class Server::Deploy
+class Server::Deploy < Server::SSH
   def perform
     start_ssh self, as: "root" do |ssh|
       ssh.execute "cd repo"
