@@ -1,9 +1,18 @@
 # Every module or class should have responsibility over a single part of functionality
 # and that responsibility should be entirely encapsulated
 # Hatchbox
+
 class Server < ApplicationRecord
   has_many :apps
   validates :name, presence: true
+end
+
+class App::Deploy
+  def perform
+    app.servers.each do |server|
+      Server::Deploy.new(server.perform)
+    end
+  end
 end
 
 class Server::Setup < Server::SSH
@@ -16,7 +25,7 @@ class Server::Setup < Server::SSH
 end
 
 class Server::Deploy < Server::SSH
-  def perform
+  def deploy
     start_ssh self, as: "root" do |ssh|
       ssh.execute "cd repo"
       ssh.execute "git remote update"
