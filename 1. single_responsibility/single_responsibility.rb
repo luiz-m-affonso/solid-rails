@@ -6,14 +6,18 @@
 class Server < ApplicationRecord
   has_many :appos
   validates_presence_of :name
+end
 
-  def setup
+class Server::Setup
+  def perform
     start_ssh self, as: "root" do |ssh|
       ssh.execute 'apt install ruby'
       ssh.execute 'git clone git@github.com:username/repo.git'
     end
   end
+end
 
+class Server::Deploy
   def deploy
     start_ssh self, as: "root" do |ssh|
       ssh.execute 'cd repo'
@@ -21,7 +25,9 @@ class Server < ApplicationRecord
       ssh.execute 'touch tmp/restart.txt'
     end
   end
+end
 
+class Server::StartSSH
   def start_ssh as: 'deploy', &block
     Net::SSH.start self.ip do |ssh|
       block.call ssh
