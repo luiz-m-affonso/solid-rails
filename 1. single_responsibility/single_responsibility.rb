@@ -4,7 +4,7 @@
 # Hatchbox.io
 
 class Server < ApplicationRecord
-  has_many :appos
+  has_many :apps
   validates_presence_of :name
 end
 
