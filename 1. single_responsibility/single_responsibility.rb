@@ -8,7 +8,17 @@ class Server < ApplicationRecord
   validates_presence_of :name
 end
 
-class Server::Setup
+#app/scripts/app/deploy.rb
+class App::Deploy
+  def perform
+    app.servers.each do |server|
+      Server::Deploy.new(server).perform
+    end
+  end
+end
+
+# app/scripts/servers/setup.rb
+class Server::Setup < Server::SSH
   def perform
     start_ssh self, as: "root" do |ssh|
       ssh.execute 'apt install ruby'
@@ -17,7 +27,13 @@ class Server::Setup
   end
 end
 
-class Server::Deploy
+# app/scripts/servers/create_database.rb
+class Server::CreateDatabase < Server::SSH
+  def perform(name, username, password); end
+end
+
+# app/scripts/servers/deploy.rb
+class Server::Deploy < Server::SSH
   def deploy
     start_ssh self, as: "root" do |ssh|
       ssh.execute 'cd repo'
@@ -27,10 +43,15 @@ class Server::Deploy
   end
 end
 
-class Server::StartSSH
+# app/scripts/servers/ssh.rb
+class Server::SSH
   def start_ssh as: 'deploy', &block
     Net::SSH.start self.ip do |ssh|
       block.call ssh
     end
+  end
+
+  def logger
+    # ActionCable Logger-JSON-XML
   end
 end
